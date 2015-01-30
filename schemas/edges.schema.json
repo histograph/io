@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://erfgeo.nl/rdf/edge",
+  "type": "object",
+  "properties": {
+    "from": {
+      "id": "http://erfgeo.nl/rdf/edge/from",
+      "type": ["integer", "string"]
+    },
+    "to": {
+      "id": "http://erfgeo.nl/rdf/edge/to",
+      "type": ["integer", "string"]
+    },
+    "type": {
+      "id": "http://erfgeo.nl/rdf/edge/type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "from",
+    "to",
+    "type"
+  ]
+}

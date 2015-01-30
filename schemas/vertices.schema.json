@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://erfgeo.nl/rdf/vertex",
+  "type": "object",
+  "properties": {
+    "id": {
+      "id": "http://erfgeo.nl/rdf/vertex/id",
+      "type": ["integer", "string"]
+    },
+    "name": {
+      "id": "http://erfgeo.nl/rdf/vertex/name",
+      "type": "string"
+    },
+    "type": {
+      "id": "http://erfgeo.nl/rdf/vertex/type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "type"
+  ]
+}
