@@ -1,15 +1,18 @@
 {
-  "name": "import-api",
+  "name": "histograph-io",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
     "diff-utility": "0.0.2",
+    "express": "^4.11.2",
+    "express-busboy": "^2.1.0",
     "fs-extra": "^0.16.3",
     "hiredis": "^0.1.17",
     "is-my-json-valid": "^2.3.0",
     "redis": "^0.12.1",
-    "watch": "^0.13.0"
+    "watch": "^0.13.0",
+    "exec-stream": "git://github.com/roadrunner2/exec-stream.git"
   },
   "devDependencies": {},
   "scripts": {
