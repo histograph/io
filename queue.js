@@ -5,17 +5,18 @@ var redis = require("redis"),
 // support creating new queues, and multiple transactions!
 
 function add(type, data) {
-  multi.lpush(type, JSON.stringify(data));
+  // multi.lpush(type, JSON.stringify(data));
+  console.log(type, data)
 }
 
 function startTransaction() {
-  multi = client.multi();
+  // multi = client.multi();
 }
 
 function commitTransaction() {
-  multi.exec(function (err, replies) {
-    console.log(replies);
-  });
+  // multi.exec(function (err, replies) {
+  //   console.log(replies);
+  // });
 }
 
 module.exports.add = add;
