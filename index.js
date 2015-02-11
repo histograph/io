@@ -47,7 +47,8 @@ function fileChanged(f) {
               var action = (line.type == "in") ? "add" : "delete";
               queue.add(objectType, {
                 action: action,
-                data: obj
+                data: obj,
+                line: line
               });
             } else {
               cancel = true;
