@@ -14,8 +14,38 @@
   <p>
     Histograph IO
   </p>
+  <form action="/data" class="dropzone" id="histograph"></form>
+  <script>
+    function urlFromFilename(filename) {
+      var fileElements = filename.split(".");
+      if (fileElements.length == 3) {
+        return "/data/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
+      } else {
+        return null;
+      }
+    }
 
-  <!-- Change /upload-target to your upload address -->
-  <form action="/data/test/pits.ndjson" class="dropzone"></form>
+    Dropzone.options.histograph = {
+      maxFilesize: 1024, // MB
+      acceptedFiles: ".ndjson,.json",
+      init: function() {
+        this.on("processing", function(file) {
+          this.options.url = urlFromFilename(file.name);
+        });
+      },
+      accept: function(file, done) {
+        // file.name must use naming convention: "source.type.extension";
+        var fileElements = file.name.split(".");
+        if (fileElements.length == 3) {
+          var url = "/data/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
+          Dropzone.options.histograph.url = url;
+          document.getElementById("histograph").action = url;
+          done();
+        } else {
+          done("Please use correct naming convention for file!");
+        }
+      }
+    };
+  </script>
 </body>
 </html>
