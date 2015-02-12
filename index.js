@@ -68,7 +68,9 @@ app.post('/data/:layer/:file', multer({
             .on('data', function(obj) {
               var valid = validators[req.params.file](obj);
               if (!valid) {
-                responseError.details.push(validators[req.params.file].errors);
+                if (responseError.details < 10) {
+                  responseError.details.push(validators[req.params.file].errors);
+                }
                 allValid = false;
               }
             })
