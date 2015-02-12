@@ -1,18 +1,16 @@
 {
   "name": "histograph-io",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "dependencies": {
     "diff-utility": "0.0.2",
+    "exec-stream": "git://github.com/roadrunner2/exec-stream.git",
     "express": "^4.11.2",
-    "express-busboy": "^2.1.0",
     "fs-extra": "^0.16.3",
-    "hiredis": "^0.1.17",
     "is-my-json-valid": "^2.3.0",
-    "redis": "^0.12.1",
-    "watch": "^0.13.0",
-    "exec-stream": "git://github.com/roadrunner2/exec-stream.git"
+    "multer": "^0.1.7",
+    "ndjson": "^1.3.0"
   },
   "devDependencies": {},
   "scripts": {

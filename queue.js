@@ -1,12 +1,12 @@
-var redis = require("redis"),
-    client = redis.createClient(),
-    multi;
+// var redis = require("redis"),
+//     client = redis.createClient(),
+//     multi;
 
 // support creating new queues, and multiple transactions!
 
-function add(type, data) {
+function add(data) {
   // multi.lpush(type, JSON.stringify(data));
-  console.log(type, data)
+  console.log(data)
 }
 
 function startTransaction() {
