@@ -9,9 +9,8 @@ var fs = require('fs'),
     };
 
 function fileChanged(layer, file) {
-  var filePath = "./data/" + layer + "/" + file;
-
-  var ext = path.extname(filePath),
+  var filePath = "./data/" + layer + "/" + file,
+      ext = path.extname(filePath),
       type = path.basename(filePath, ext);
 
   if (ext === ".ndjson") {
@@ -20,6 +19,7 @@ function fileChanged(layer, file) {
 
     diff(current.getCurrent(filePath), filePath)
       .on("diff", function (line) {
+
         var item = {
           layer: layer,
           type: types[type],

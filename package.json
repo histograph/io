@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "diff-utility": "0.0.2",
+    "diff-utility": "^0.0.4",
     "exec-stream": "git://github.com/roadrunner2/exec-stream.git",
     "express": "^4.11.2",
     "fs-extra": "^0.16.3",
