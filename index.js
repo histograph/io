@@ -74,9 +74,11 @@ app.post('/data/:layer/:file', multer({
             })
             .on('error', function(err) {
               allValid = false;
-              responseError.details.push({
-                errors: err
-              });
+              if (responseError.details < 10) {
+                responseError.details.push({
+                  errors: err
+                });
+              }
 
               // TODO: DRY! Refactor!
               res.status(422);
