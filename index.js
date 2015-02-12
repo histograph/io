@@ -1,75 +1,154 @@
 var fs = require('fs'),
-    watch = require('watch'),
-    path = require('path'),
-    diff = require('diff-utility'),
+    express = require('express'),
+    multer = require('multer'),
+    ndjson = require('ndjson'),
+    execStream = require('exec-stream'),
+    app = express(),
+    diff = require('./diff'),
+    validFiles = JSON.parse(fs.readFileSync('./valid-files.json', 'utf8')),
     validator = require('is-my-json-valid'),
-    current = require('./current'),
-    queue = require('./queue'),
-    ndjsonFiles = [
-      "vertices",
-      "edges"
-    ],
     validators = {};
 
-ndjsonFiles.forEach(function(ndjsonFile) {
-  validators[ndjsonFile] = validator(fs.readFileSync("schemas/" + ndjsonFile + ".schema.json", "utf8"))
-})
+validFiles.forEach(function(validFile) {
+  // validFile = "<name>.<extension>"
+  var validFileElements = validFile.split('.');
+  validators[validFile] = validator(fs.readFileSync("./schemas/" + validFileElements[0] + ".schema.json", "utf8"))
+});
 
-watch.createMonitor('./data', {
-    filter: function(f) {
-      return f.indexOf(current.dirName()) == -1;
+app.use(express.static(__dirname + '/public'));
+
+app.get('/data', function(req, res) {
+  // TODO: return all data files
+});
+
+app.get('/data/:source', function(req, res) {
+  // TODO: return :source files
+});
+
+app.get('/data/:source/:file', function(req, res) {
+  var filename = './data/' + req.params.source + '/' + req.params.file;
+  fs.exists(filename, function (exists) {
+    if (exists) {
+      var stat = fs.statSync(filename);
+
+      res.writeHead(200, {
+        'Content-Type': 'text/plain',
+        'Content-Length': stat.size
+      });
+      fs.createReadStream(filename).pipe(res);
+    } else {
+      res.status(404);
+      res.send({ error: 'Not found' });
     }
-  }, function (monitor) {
-
-  monitor.on("created", fileChanged);
-  monitor.on("changed", fileChanged);
-
-  monitor.on("removed", function (f, stat) {
-    console.log("Removed: " + f);
   });
 });
 
-function fileChanged(f) {
-  var ext = path.extname(f),
-      base = path.basename(f, ext),
-      layer = "test";
+app.post('/data/:source', function(req, res) {
+  // TODO: process zip file
+});
 
-  if (ext === ".ndjson" && ndjsonFiles.indexOf(base) > -1) {
-    var objectType = base;
-    var cancel = false;
-    queue.startTransaction();
-    diff(current.getCurrent(f), f)
-      .on("diff", function (line) {
-        if (!cancel) {
-          try {
-            var obj = JSON.parse(line.str);
-            if (validators[objectType](obj)) {
-              var action = (line.type == "in") ? "add" : "delete";
-              queue.add(objectType, {
-                action: action,
-                data: obj,
-                line: line
+app.post('/data/:source/:file', multer({
+    dest: './uploads/',
+  }),function(req, res) {
+    if (fs.existsSync('./data/' + req.params.source)) {
+      if (validFiles.indexOf(req.params.file) > -1) {
+        var source = './uploads/' + req.files.file.name;
+        var dest = "./data/" + req.params.source + "/" + req.params.file;
+
+        if (req.params.file.split(".")[1] == "ndjson") {
+          var responseError = {
+                error: "NDJSON does not comply to schema",
+                details: []
+              },
+              allValid = true;
+
+          fs.createReadStream(source)
+            .pipe(execStream('sort'))
+            .pipe(ndjson.parse())
+            .on('data', function(obj) {
+              var valid = validators[req.params.file](obj);
+              if (!valid) {
+                responseError.details.push(validators[req.params.file].errors);
+                allValid = false;
+              }
+            })
+            .on('error', function(err) {
+              allValid = false;
+              responseError.details.push({
+                line: line,
+                errors: err
               });
-            } else {
-              cancel = true;
-              queue.cancelTransaction();
+              console.log("NU HIER")
+              // TODO: DRY! Refactor!
+              res.status(422);
+              res.send(responseError);
+              fs.unlinkSync(source);
+
+            })
+            .on('end', function() {
+
+              if (allValid) {
+                res.sendStatus(200);
+                fs.renameSync(source, dest);
+
+                // TODO: use lock? make sure dest is not overwritten
+                // when diff processes file
+                diff.fileChanged(dest);
+              } else {
+                res.status(422);
+                res.send(responseError);
+                fs.unlinkSync(source);
+              }
+            });
+
+        } else {
+          // TODO: check file size!
+
+          var json,
+              responseError,
+              valid = false;
+
+          try {
+            json = JSON.parse(fs.readFileSync(source, 'utf8'));
+            valid = validators[req.params.file](json);
+          } catch (e) {
+            responseError = {
+              error: "Error parsing JSON",
+              details: e
+            };
+          }
+
+          if (valid) {
+            res.sendStatus(200);
+            fs.renameSync(source, dest);
+
+            diff.fileChanged(dest);
+          } else {
+            res.status(405);
+            if (validators[req.params.file].errors) {
+              responseError = {
+                error: "File does not comply to JSON schema",
+                details: validators[req.params.file].errors
+              };
             }
-          } catch(e) {
-            cancel = true;
-            queue.cancelTransaction();
+
+            res.send(responseError);
+            fs.unlinkSync(source);
           }
         }
-      })
-      .on("error", function(error) {
-        cancel = true;
-        queue.cancelTransaction();
-        console.log("Error: " + error);
-      })
-      .on("end", function() {
-        if (!cancel) {
-          queue.commitTransaction();
-          current.setCurrent(f);
-        }
+      } else {
+        res.status(405);
+        res.send({
+          error: "Filename not valid for source '" + req.params.source + "'. Should be one of the following: " +
+              validFiles.map(function(f) { return "'" + req.params.source + "." + f + "'"; }).join(", ")
+        });
+      }
+    } else {
+      res.status(405);
+      res.send({
+        error: "Source '" + req.params.source + "' does not exist"
       });
-  }
-}
+    }
+});
+
+app.listen(process.env.PORT || 8080);
