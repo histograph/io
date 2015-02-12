@@ -21,12 +21,12 @@ app.get('/data', function(req, res) {
   // TODO: return all data files
 });
 
-app.get('/data/:source', function(req, res) {
-  // TODO: return :source files
+app.get('/data/:layer', function(req, res) {
+  // TODO: return :layer files
 });
 
-app.get('/data/:source/:file', function(req, res) {
-  var filename = './data/' + req.params.source + '/' + req.params.file;
+app.get('/data/:layer/:file', function(req, res) {
+  var filename = './data/' + req.params.layer + '/' + req.params.file;
   fs.exists(filename, function (exists) {
     if (exists) {
       var stat = fs.statSync(filename);
@@ -43,17 +43,17 @@ app.get('/data/:source/:file', function(req, res) {
   });
 });
 
-app.post('/data/:source', function(req, res) {
+app.post('/data/:layer', function(req, res) {
   // TODO: process zip file
 });
 
-app.post('/data/:source/:file', multer({
+app.post('/data/:layer/:file', multer({
     dest: './uploads/',
   }),function(req, res) {
-    if (fs.existsSync('./data/' + req.params.source)) {
+    if (fs.existsSync('./data/' + req.params.layer)) {
       if (validFiles.indexOf(req.params.file) > -1) {
         var source = './uploads/' + req.files.file.name;
-        var dest = "./data/" + req.params.source + "/" + req.params.file;
+        var dest = "./data/" + req.params.layer + "/" + req.params.file;
 
         if (req.params.file.split(".")[1] == "ndjson") {
           var responseError = {
@@ -93,7 +93,7 @@ app.post('/data/:source/:file', multer({
 
                 // TODO: use lock? make sure dest is not overwritten
                 // when diff processes file
-                diff.fileChanged(dest);
+                diff.fileChanged(req.params.layer, req.params.file);
               } else {
                 res.status(422);
                 res.send(responseError);
@@ -122,7 +122,7 @@ app.post('/data/:source/:file', multer({
             res.sendStatus(200);
             fs.renameSync(source, dest);
 
-            diff.fileChanged(dest);
+            diff.fileChanged(req.params.layer, req.params.file);
           } else {
             res.status(405);
             if (validators[req.params.file].errors) {
@@ -139,14 +139,14 @@ app.post('/data/:source/:file', multer({
       } else {
         res.status(405);
         res.send({
-          error: "Filename not valid for source '" + req.params.source + "'. Should be one of the following: " +
-              validFiles.map(function(f) { return "'" + req.params.source + "." + f + "'"; }).join(", ")
+          error: "Filename not valid for layer '" + req.params.layer + "'. Should be one of the following: " +
+              validFiles.map(function(f) { return "'" + req.params.layer + "." + f + "'"; }).join(", ")
         });
       }
     } else {
       res.status(405);
       res.send({
-        error: "Source '" + req.params.source + "' does not exist"
+        error: "Layer '" + req.params.layer + "' does not exist"
       });
     }
 });
