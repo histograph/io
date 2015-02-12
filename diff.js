@@ -18,7 +18,6 @@ function fileChanged(layer, file) {
     var previousItem,
         previousLine;
 
-    // queue.startTransaction();
     diff(current.getCurrent(filePath), filePath)
       .on("diff", function (line) {
         var item = {
@@ -49,15 +48,12 @@ function fileChanged(layer, file) {
         previousLine = line;
       })
       .on("error", function(error) {
-        queue.cancelTransaction();
         console.log("Error: " + error);
       })
       .on("end", function() {
         if (previousItem) {
           queue.add(previousItem);
         }
-
-        queue.commitTransaction();
         current.setCurrent(filePath);
       });
   }
