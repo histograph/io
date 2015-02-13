@@ -2,6 +2,7 @@ var fs = require('fs'),
     express = require('express'),
     multer = require('multer'),
     ndjson = require('ndjson'),
+    async = require('async'),
     execStream = require('exec-stream'),
     app = express(),
     diff = require('./diff'),
@@ -18,11 +19,45 @@ validFiles.forEach(function(validFile) {
 app.use(express.static(__dirname + '/public'));
 
 app.get('/layers', function(req, res) {
-  // TODO: return all layers
+  fs.readdir('./layers', function(err, directories) {
+
+    async.mapSeries(directories, function(dir, callback) {
+      if (dir != '.') {
+        fs.stat("./layers/" + dir, function (err, stat) {
+          if (stat.isDirectory()) {
+            callback(null, dir);
+          } else {
+            callback(null);
+          }
+        });
+      } else {
+        callback(null);
+      }
+    }, function(err, dirs) {
+      var results = dirs.filter(function(dir) {
+        return dir;
+      }).map(function(dir) {
+        return {
+          name: dir
+        }
+      });
+      res.send(results);
+    });
+  });
 });
 
 app.get('/layers/:layer', function(req, res) {
-  // TODO: return :layer files
+  async.filterSeries(validFiles, function(file, callback) {
+    fs.exists("./layers/" + req.params.layer + "/" + file, function (exists) {
+      callback(exists);
+    });
+  }, function(files) {
+    res.send(files.reduce(function(o, v, i) {
+      o[v.split(".")[0]] = "http://localhost:8080/layers/" + req.params.layer + "/" + v;
+      return o;
+    }, {}));
+  });
+
 });
 
 app.get('/layers/:layer/:file', function(req, res) {

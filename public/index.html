@@ -7,6 +7,7 @@
   <meta name="author" content="Bert Spaan">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <script src="js/dropzone.min.js"></script>
+  <script src="js/d3.v3.min.js"></script>
 
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/skeleton.css">
@@ -25,9 +26,24 @@
       </p>
       <form action="/layers" class="dropzone" id="histograph"></form>
       <h2>Layers</h2>
-
+      <p id="layers"></p>
     </div>
   </div>
+  <script>
+    d3.json('/layers', function(json) {
+      d3.select("#layers").selectAll("span")
+          .data(json).enter()
+        .append("span")
+          .each(function(d, i) {
+            d3.select(this).append("code").append("a")
+                .attr("href", "/layers/" + d.name)
+                .html(d.name)
+            if (i < json.length - 1) {
+              d3.select(this).html(d3.select(this).html() + ", ");
+            }
+          });
+    });
+  </script>
   <script>
     function urlFromFilename(filename) {
       var fileElements = filename.split(".");
