@@ -3,18 +3,29 @@
 <head>
   <meta charset="utf-8">
   <title>Histograph IO</title>
-  <meta name="description" content="">
+  <meta name="description" content="Histograph IO - Drag'n'drop file uploads!">
   <meta name="author" content="Bert Spaan">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <script src="dropzone.min.js"></script>
-  <link rel="stylesheet" href="basic.min.css">
-  <link rel="stylesheet" href="dropzone.min.css">
+  <script src="js/dropzone.min.js"></script>
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <link rel="stylesheet" href="css/basic.min.css">
+  <link rel="stylesheet" href="css/dropzone.min.css">
+
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <p>
-    Histograph IO
-  </p>
-  <form action="/data" class="dropzone" id="histograph"></form>
+  <div class="container">
+    <div class="row">
+      <h1>Histograph IO</h1>
+      <p>
+        Drag'n'drop <a href="http://ndjson.org/">NDJSON</a> files into Histograph! Files must be named <code>&lt;layer&gt;.pits.ndjson</code> or <code>&lt;layer&gt;.relations.ndjson</code>, and adhere to <a href="https://github.com/erfgoed-en-locatie/histograph-io/tree/master/schemas">Histograph's JSON schemas</a>.
+      </p>
+      <form action="/data" class="dropzone" id="histograph"></form>
+    </div>
+  </div>
   <script>
     function urlFromFilename(filename) {
       var fileElements = filename.split(".");
@@ -26,6 +37,7 @@
     }
 
     Dropzone.options.histograph = {
+      clickable: false,
       maxFilesize: 1024, // MB
       acceptedFiles: ".ndjson,.json",
       init: function() {
@@ -38,8 +50,6 @@
         var fileElements = file.name.split(".");
         if (fileElements.length == 3) {
           var url = "/data/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
-          Dropzone.options.histograph.url = url;
-          document.getElementById("histograph").action = url;
           done();
         } else {
           done("Please use correct naming convention for file!");

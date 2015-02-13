@@ -1,0 +1,122 @@
+/* Fonts
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Light.ttf");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-LightItalic.ttf");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Italic.ttf");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Semibold.ttf");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-SemiboldItalic.ttf");
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Bold.ttf");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-BoldItalic.ttf");
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-ExtraBold.ttf");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-ExtraBoldItalic.ttf");
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Bree Serif';
+  src: url("../fonts/BreeSerif-Regular.otf");
+  font-weight: 800;
+  font-style: italic;
+}
+
+/* Style
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+body {
+  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Bree Serif", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.no-left-margin {
+  padding-left: 0;
+}
+
+.vertical-align-top td {
+  vertical-align: top;
+}
+
+table.no-borders td {
+  border-bottom: none;
+}
+
+table.no-borders tbody tr:first-child {
+  border-top: 1px solid black;
+}
+
+table.no-borders tr.border-bottom {
+  border-bottom: 1px solid black;
+}
+
+.dz-filename {
+  font-family: monospace;
+}
+
+.dropzone .dz-preview.dz-file-preview.dz-success .dz-image {
+  background: linear-gradient(to bottom, #71D816, #5FB713) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+
+.dropzone .dz-preview.dz-file-preview.dz-error .dz-image {
+  background: linear-gradient(to bottom, #B22314, #D82A19) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
