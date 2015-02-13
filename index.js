@@ -17,16 +17,16 @@ validFiles.forEach(function(validFile) {
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/data', function(req, res) {
-  // TODO: return all data files
+app.get('/layers', function(req, res) {
+  // TODO: return all layers
 });
 
-app.get('/data/:layer', function(req, res) {
+app.get('/layers/:layer', function(req, res) {
   // TODO: return :layer files
 });
 
-app.get('/data/:layer/:file', function(req, res) {
-  var filename = './data/' + req.params.layer + '/' + req.params.file;
+app.get('/layers/:layer/:file', function(req, res) {
+  var filename = './layers/' + req.params.layer + '/' + req.params.file;
   fs.exists(filename, function (exists) {
     if (exists) {
       var stat = fs.statSync(filename);
@@ -43,17 +43,17 @@ app.get('/data/:layer/:file', function(req, res) {
   });
 });
 
-app.post('/data/:layer', function(req, res) {
+app.post('/layers/:layer', function(req, res) {
   // TODO: process zip file
 });
 
-app.post('/data/:layer/:file', multer({
+app.post('/layers/:layer/:file', multer({
     dest: './uploads/',
   }),function(req, res) {
-    if (fs.existsSync('./data/' + req.params.layer)) {
+    if (fs.existsSync('./layers/' + req.params.layer)) {
       if (validFiles.indexOf(req.params.file) > -1) {
         var source = './uploads/' + req.files.file.name;
-        var dest = "./data/" + req.params.layer + "/" + req.params.file;
+        var dest = "./layers/" + req.params.layer + "/" + req.params.file;
 
         if (req.params.file.split(".")[1] == "ndjson") {
           var responseError = {

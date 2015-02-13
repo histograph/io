@@ -23,14 +23,16 @@
       <p>
         Drag'n'drop <a href="http://ndjson.org/">NDJSON</a> files into Histograph! Files must be named <code>&lt;layer&gt;.pits.ndjson</code> or <code>&lt;layer&gt;.relations.ndjson</code>, and adhere to <a href="https://github.com/erfgoed-en-locatie/histograph-io/tree/master/schemas">Histograph's JSON schemas</a>.
       </p>
-      <form action="/data" class="dropzone" id="histograph"></form>
+      <form action="/layers" class="dropzone" id="histograph"></form>
+      <h2>Layers</h2>
+
     </div>
   </div>
   <script>
     function urlFromFilename(filename) {
       var fileElements = filename.split(".");
       if (fileElements.length == 3) {
-        return "/data/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
+        return "/layers/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
       } else {
         return null;
       }
@@ -49,7 +51,7 @@
         // file.name must use naming convention: "source.type.extension";
         var fileElements = file.name.split(".");
         if (fileElements.length == 3) {
-          var url = "/data/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
+          var url = "/layers/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
           done();
         } else {
           done("Please use correct naming convention for file!");

@@ -9,7 +9,7 @@ var fs = require('fs'),
     };
 
 function fileChanged(layer, file) {
-  var filePath = "./data/" + layer + "/" + file,
+  var filePath = "./layers/" + layer + "/" + file,
       ext = path.extname(filePath),
       type = path.basename(filePath, ext);
 
