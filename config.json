@@ -1,6 +1,5 @@
 {
   "redis": {
-    "rutger": "10.0.135.46",
     "host": "localhost",
     "port": 6379,
     "list": "histograph-queue"
