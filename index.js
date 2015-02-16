@@ -87,6 +87,10 @@ app.post('/layers/:layer/:file', multer({
   }),function(req, res) {
     if (fs.existsSync('./layers/' + req.params.layer)) {
       if (validFiles.indexOf(req.params.file) > -1) {
+
+        // TODO: check whether req.files is empty.
+        // either process files, or streaming POST data
+
         var source = './uploads/' + req.files.file.name;
         var dest = "./layers/" + req.params.layer + "/" + req.params.file;
 
