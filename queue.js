@@ -7,7 +7,7 @@ var redis = require("redis"),
 function add(data) {
   console.log("Pushing to queue:");
   console.log(data)
-  client.lpush(list, JSON.stringify(data));
+  client.rpush(list, JSON.stringify(data));
 }
 
 module.exports.add = add;
