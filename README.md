@@ -1,6 +1,6 @@
 # Histograph IO
 
-With Histograph IO, you can import [Newline delimited JSON](http://ndjson.org/) files into [Histograph](https://github.com/erfgoed-en-locatie/histograph).
+With Histograph IO, you can import [Newline delimited JSON](http://ndjson.org/) files into [Histograph](http://histograph.github.io).
 
 Prerequisites, because Histograph IO uses [`sort`](http://en.wikipedia.org/wiki/Sort_%28Unix%29) before parsing NDJSON files:
 
