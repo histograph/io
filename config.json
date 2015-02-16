@@ -3,5 +3,11 @@
     "host": "localhost",
     "port": 6379,
     "list": "histograph-queue"
-  }
+  },
+  "validFiles": [
+    "pits.ndjson",
+    "relations.ndjson",
+    "source.json",
+    "rules.json"
+  ]
 }
