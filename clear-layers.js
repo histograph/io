@@ -8,7 +8,7 @@ var fs = require('fs'),
       'relations'
     ];
 
-console.log("Removind layer data...")
+console.log("Removing layer data...")
 
 fs.readdir(layersDir, function(err, directories){
   directories.forEach(function (dir) {
