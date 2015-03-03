@@ -6,11 +6,11 @@ var fs = require('fs'),
     execStream = require('exec-stream'),
     app = express(),
     diff = require('./lib/diff'),
-    config = require('./config.json'),
+    config = require(process.env.HISTOGRAPH_CONFIG),
     validator = require('is-my-json-valid'),
     validators = {};
 
-config.validFiles.forEach(function(validFile) {
+config.data.validFiles.forEach(function(validFile) {
   // validFile = "<name>.<extension>"
   var validFileElements = validFile.split('.');
   validators[validFile] = validator(fs.readFileSync("./schemas/" + validFileElements[0] + ".schema.json", "utf8"))
@@ -47,7 +47,7 @@ app.get('/layers', function(req, res) {
 });
 
 app.get('/layers/:layer', function(req, res) {
-  async.filterSeries(config.validFiles, function(file, callback) {
+  async.filterSeries(config.data.validFiles, function(file, callback) {
     fs.exists("./layers/" + req.params.layer + "/" + file, function (exists) {
       callback(exists);
     });
@@ -86,7 +86,7 @@ app.post('/layers/:layer/:file', multer({
     dest: './uploads/',
   }),function(req, res) {
     if (fs.existsSync('./layers/' + req.params.layer)) {
-      if (config.validFiles.indexOf(req.params.file) > -1) {
+      if (config.data.validFiles.indexOf(req.params.file) > -1) {
 
         // TODO: check whether req.files is empty.
         // either process files, or streaming POST data
@@ -182,7 +182,7 @@ app.post('/layers/:layer/:file', multer({
         res.status(405);
         res.send({
           error: "Filename not valid for layer '" + req.params.layer + "'. Should be one of the following: " +
-              config.validFiles.map(function(f) { return "'" + req.params.layer + "." + f + "'"; }).join(", ")
+              config.data.validFiles.map(function(f) { return "'" + req.params.layer + "." + f + "'"; }).join(", ")
         });
       }
     } else {
