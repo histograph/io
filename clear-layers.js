@@ -1,5 +1,4 @@
 var fs = require('fs'),
-    config = require('./config.json'),
     path = require('path'),
     async = require('async'),
     layersDir = './layers',
