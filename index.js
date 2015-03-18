@@ -10,6 +10,35 @@ var fs = require('fs'),
     validator = require('is-my-json-valid'),
     validators = {};
 
+function createLayerDirs () {
+	fs.readdir('./layers', function(err, directories) {
+		if(err) {
+			fs.mkdirSync("./layers");
+		}
+	});
+
+	fs.readdir(config.data.dir, function(err, directories) {
+		async.eachSeries(directories, function(dir, callback) {
+
+			fs.stat("./layers/" + dir, function (err, stat) {
+				if (err) {
+					fs.stat(config.data.dir + "/" + dir, function (err, stat2) {
+						if (stat2.isDirectory()) {
+							fs.mkdirSync("./layers/" + dir);
+						}
+						callback();
+					});
+					callback();
+				} else {
+					callback();
+				}
+			});
+		});
+	});
+}
+
+createLayerDirs();
+
 config.data.validFiles.forEach(function(validFile) {
   // validFile = "<name>.<extension>"
   var validFileElements = validFile.split('.');
@@ -193,4 +222,6 @@ app.post('/layers/:layer/:file', multer({
     }
 });
 
-app.listen(process.env.PORT || 8080);
+var server = app.listen(config.io.port, function () {
+	console.log('Histograph IO listening on port ' + config.io.port);
+});
