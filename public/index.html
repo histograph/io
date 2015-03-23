@@ -23,22 +23,22 @@
       <h1>Histograph IO</h1>
       <p>
         Drag'n'drop <a href="http://ndjson.org/">NDJSON</a> files into
-		Histograph! Files must be named <code>&lt;layer&gt;.pits.ndjson</code>
-		or <code>&lt;layer&gt;.relations.ndjson</code>, and adhere to <a href="https://github.com/histograph/schemas/tree/master/io">Histograph's JSON schemas</a>.
+		Histograph! Files must be named <code>&lt;source&gt;.pits.ndjson</code>
+		or <code>&lt;source&gt;.relations.ndjson</code>, and adhere to <a href="https://github.com/histograph/schemas/tree/master/io">Histograph's JSON schemas</a>.
       </p>
-      <form action="/layers" class="dropzone" id="histograph"></form>
-      <h2>Layers</h2>
-      <p id="layers"></p>
+      <form action="/sources" class="dropzone" id="histograph"></form>
+      <h2>Sources</h2>
+      <p id="sources"></p>
     </div>
   </div>
   <script>
-    d3.json('/layers', function(json) {
-      d3.select("#layers").selectAll("span")
+    d3.json('/sources', function(json) {
+      d3.select("#sources").selectAll("span")
           .data(json).enter()
         .append("span")
           .each(function(d, i) {
             d3.select(this).append("code").append("a")
-                .attr("href", "/layers/" + d.name)
+                .attr("href", "/sources/" + d.name)
                 .html(d.name)
             if (i < json.length - 1) {
               d3.select(this).html(d3.select(this).html() + ", ");
@@ -50,7 +50,7 @@
     function urlFromFilename(filename) {
       var fileElements = filename.split(".");
       if (fileElements.length == 3) {
-        return "/layers/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
+        return "/sources/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
       } else {
         return null;
       }
@@ -69,7 +69,7 @@
         // file.name must use naming convention: "source.type.extension";
         var fileElements = file.name.split(".");
         if (fileElements.length == 3) {
-          var url = "/layers/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
+          var url = "/sources/" + fileElements[0] + "/" + fileElements[1] + "." + fileElements[2];
           done();
         } else {
           done("Please use correct naming convention for file!");

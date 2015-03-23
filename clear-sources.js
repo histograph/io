@@ -1,24 +1,24 @@
 var fs = require('fs'),
     path = require('path'),
     async = require('async'),
-    layersDir = './layers',
+    sourcesDir = './sources',
     files = [
       'pits',
       'relations'
     ];
 
-console.log("Removing layer data...")
+console.log("Removing source data...")
 
-fs.readdir(layersDir, function(err, directories){
+fs.readdir(sourcesDir, function(err, directories){
   directories.forEach(function (dir) {
     if (dir != '.') {
-      fs.stat(layersDir + "/" + dir, function (err, stat) {
+      fs.stat(sourcesDir + "/" + dir, function (err, stat) {
         if (stat.isDirectory()) {
-          var layer = dir;
-          console.log("  " + layer + "/*.ndjson")
+          var source = dir;
+          console.log("  " + source + "/*.ndjson")
           files.forEach(function(file) {
-            var filepath = layersDir + "/" + layer + "/" + file + ".ndjson";
-            var filepathCurrent = layersDir + "/" + layer + "/current/" + file + ".ndjson";
+            var filepath = sourcesDir + "/" + source + "/" + file + ".ndjson";
+            var filepathCurrent = sourcesDir + "/" + source + "/current/" + file + ".ndjson";
 
             try {
               fs.unlinkSync(filepath);

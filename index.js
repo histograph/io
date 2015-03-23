@@ -10,21 +10,21 @@ var fs = require('fs'),
     validator = require('is-my-json-valid'),
     validators = {};
 
-function createLayerDirs () {
-	fs.readdir('./layers', function(err, directories) {
+function createSourceDirs () {
+	fs.readdir('./sources', function(err, directories) {
 		if(err) {
-			fs.mkdirSync("./layers");
+			fs.mkdirSync("./sources");
 		}
 	});
 
 	fs.readdir(config.data.dir, function(err, directories) {
 		async.eachSeries(directories, function(dir, callback) {
 
-			fs.stat("./layers/" + dir, function (err, stat) {
+			fs.stat("./sources/" + dir, function (err, stat) {
 				if (err) {
 					fs.stat(config.data.dir + "/" + dir, function (err, stat2) {
 						if (stat2.isDirectory()) {
-							fs.mkdirSync("./layers/" + dir);
+							fs.mkdirSync("./sources/" + dir);
 						}
 						callback();
 					});
@@ -37,7 +37,7 @@ function createLayerDirs () {
 	});
 }
 
-createLayerDirs();
+createSourceDirs();
 
 config.data.validFiles.forEach(function(validFile) {
   // validFile = "<name>.<extension>"
@@ -47,12 +47,12 @@ config.data.validFiles.forEach(function(validFile) {
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/layers', function(req, res) {
-  fs.readdir('./layers', function(err, directories) {
+app.get('/sources', function(req, res) {
+  fs.readdir('./sources', function(err, directories) {
 
     async.mapSeries(directories, function(dir, callback) {
       if (dir != '.') {
-        fs.stat("./layers/" + dir, function (err, stat) {
+        fs.stat("./sources/" + dir, function (err, stat) {
           if (stat.isDirectory()) {
             callback(null, dir);
           } else {
@@ -75,22 +75,22 @@ app.get('/layers', function(req, res) {
   });
 });
 
-app.get('/layers/:layer', function(req, res) {
+app.get('/sources/:source', function(req, res) {
   async.filterSeries(config.data.validFiles, function(file, callback) {
-    fs.exists("./layers/" + req.params.layer + "/" + file, function (exists) {
+    fs.exists("./sources/" + req.params.source + "/" + file, function (exists) {
       callback(exists);
     });
   }, function(files) {
     res.send(files.reduce(function(o, v, i) {
-      o[v.split(".")[0]] = "http://" + config.io.host + ":" + config.io.port + "/layers/" + req.params.layer + "/" + v;
+      o[v.split(".")[0]] = "http://" + config.io.host + ":" + config.io.port + "/sources/" + req.params.source + "/" + v;
       return o;
     }, {}));
   });
 
 });
 
-app.get('/layers/:layer/:file', function(req, res) {
-  var filename = './layers/' + req.params.layer + '/' + req.params.file;
+app.get('/sources/:source/:file', function(req, res) {
+  var filename = './sources/' + req.params.source + '/' + req.params.file;
   fs.exists(filename, function (exists) {
     if (exists) {
       var stat = fs.statSync(filename);
@@ -107,21 +107,21 @@ app.get('/layers/:layer/:file', function(req, res) {
   });
 });
 
-app.post('/layers/:layer', function(req, res) {
+app.post('/sources/:source', function(req, res) {
   // TODO: process zip file
 });
 
-app.post('/layers/:layer/:file', multer({
+app.post('/sources/:source/:file', multer({
     dest: './uploads/',
   }),function(req, res) {
-    if (fs.existsSync('./layers/' + req.params.layer)) {
+    if (fs.existsSync('./sources/' + req.params.source)) {
       if (config.data.validFiles.indexOf(req.params.file) > -1) {
 
         // TODO: check whether req.files is empty.
         // either process files, or streaming POST data
 
         var source = './uploads/' + req.files.file.name;
-        var dest = "./layers/" + req.params.layer + "/" + req.params.file;
+        var dest = "./sources/" + req.params.source + "/" + req.params.file;
 
         if (req.params.file.split(".")[1] == "ndjson") {
           var responseError = {
@@ -164,7 +164,7 @@ app.post('/layers/:layer/:file', multer({
 
                 // TODO: use lock? make sure dest is not overwritten
                 // when diff processes file
-                diff.fileChanged(req.params.layer, req.params.file);
+                diff.fileChanged(req.params.source, req.params.file);
               } else {
                 res.status(422);
                 res.send(responseError);
@@ -193,7 +193,7 @@ app.post('/layers/:layer/:file', multer({
             res.sendStatus(200);
             fs.renameSync(source, dest);
 
-            diff.fileChanged(req.params.layer, req.params.file);
+            diff.fileChanged(req.params.source, req.params.file);
           } else {
             res.status(405);
             if (validators[req.params.file].errors) {
@@ -210,14 +210,14 @@ app.post('/layers/:layer/:file', multer({
       } else {
         res.status(405);
         res.send({
-          error: "Filename not valid for layer '" + req.params.layer + "'. Should be one of the following: " +
-              config.data.validFiles.map(function(f) { return "'" + req.params.layer + "." + f + "'"; }).join(", ")
+          error: "Filename not valid for source '" + req.params.source + "'. Should be one of the following: " +
+              config.data.validFiles.map(function(f) { return "'" + req.params.source + "." + f + "'"; }).join(", ")
         });
       }
     } else {
       res.status(405);
       res.send({
-        error: "Layer '" + req.params.layer + "' does not exist"
+        error: "Source '" + req.params.source + "' does not exist"
       });
     }
 });
