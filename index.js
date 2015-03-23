@@ -42,7 +42,7 @@ createLayerDirs();
 config.data.validFiles.forEach(function(validFile) {
   // validFile = "<name>.<extension>"
   var validFileElements = validFile.split('.');
-  validators[validFile] = validator(fs.readFileSync("./schemas/" + validFileElements[0] + ".schema.json", "utf8"))
+  validators[validFile] = validator(fs.readFileSync(config.schemas.dir + "/io/" + validFileElements[0] + ".schema.json", "utf8"))
 });
 
 app.use(express.static(__dirname + '/public'));
@@ -82,7 +82,7 @@ app.get('/layers/:layer', function(req, res) {
     });
   }, function(files) {
     res.send(files.reduce(function(o, v, i) {
-      o[v.split(".")[0]] = "http://localhost:8080/layers/" + req.params.layer + "/" + v;
+      o[v.split(".")[0]] = "http://" + config.io.host + ":" + config.io.port + "/layers/" + req.params.layer + "/" + v;
       return o;
     }, {}));
   });
