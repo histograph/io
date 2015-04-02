@@ -1,6 +1,11 @@
 var fs = require('fs'),
+    crypto = require('crypto'),
     express = require('express'),
+    Readable = require('stream').Readable,
+
     multer = require('multer'),
+    bodyParser = require('body-parser'),
+
     ndjson = require('ndjson'),
     async = require('async'),
     execStream = require('exec-stream'),
@@ -9,6 +14,8 @@ var fs = require('fs'),
     config = require(process.env.HISTOGRAPH_CONFIG),
     validator = require('is-my-json-valid'),
     validators = {};
+
+app.use(bodyParser.text());
 
 function createSourceDirs () {
 	fs.readdir('./sources', function(err, directories) {
@@ -116,97 +123,126 @@ app.post('/sources/:source/:file', multer({
   }),function(req, res) {
     if (fs.existsSync('./sources/' + req.params.source)) {
       if (config.data.validFiles.indexOf(req.params.file) > -1) {
+        var stream,
+            source;
 
-        // TODO: check whether req.files is empty.
-        // either process files, or streaming POST data
+        if (req.files && Object.keys(req.files).length > 0) {
+          // File upload, multipart/form-data in req.files
 
-        var source = './uploads/' + req.files.file.name;
-        var dest = "./sources/" + req.params.source + "/" + req.params.file;
+          // TODO: make sure to only accept one file at a time
+          source = './uploads/' + req.files.file.name;
+        } else {
+          // JSON POST data in req.body
 
-        if (req.params.file.split(".")[1] == "ndjson") {
-          var responseError = {
-                error: "NDJSON does not comply to schema",
-                details: []
-              },
-              allValid = true;
+          var currentDate = (new Date()).valueOf().toString(),
+              random = Math.random().toString(),
+              filename = crypto.createHash('sha1').update(currentDate + random).digest('hex');
 
-          fs.createReadStream(source)
-            .pipe(execStream('sort'))
-            .pipe(ndjson.parse())
-            .on('data', function(obj) {
-              var valid = validators[req.params.file](obj);
-              if (!valid) {
-                if (responseError.details < 10) {
-                  responseError.details.push(validators[req.params.file].errors);
+          source = './uploads/' + filename;
+          var contents;
+
+          // Apparently, req.body == {} when JSON POST data is empty
+          if (typeof req.body == "object" && Object.keys(req.body).length == 0) {
+            contents = '';
+          } else {
+            contents = req.body;
+          }
+          var file = fs.openSync(source, "w");
+          fs.writeSync(file, contents);
+        }
+
+        if (source) {
+          var dest = "./sources/" + req.params.source + "/" + req.params.file;
+
+          if (req.params.file.split(".")[1] == "ndjson") {
+            var responseError = {
+                  error: "NDJSON does not comply to schema",
+                  details: []
+                },
+                allValid = true;
+
+            fs.createReadStream(source)
+              .pipe(ndjson.parse())
+              .on('data', function(obj) {
+                var valid = validators[req.params.file](obj);
+                if (!valid) {
+                  if (responseError.details < 10) {
+                    responseError.details.push(validators[req.params.file].errors);
+                  }
+                  allValid = false;
                 }
+              })
+              .on('error', function(err) {
                 allValid = false;
-              }
-            })
-            .on('error', function(err) {
-              allValid = false;
-              if (responseError.details < 10) {
-                responseError.details.push({
-                  errors: err
-                });
-              }
+                if (responseError.details < 10) {
+                  responseError.details.push({
+                    errors: err
+                  });
+                }
 
-              // TODO: DRY! Refactor!
-              res.status(422);
-              res.send(responseError);
-              fs.unlinkSync(source);
-
-            })
-            .on('end', function() {
-
-              if (allValid) {
-                res.sendStatus(200);
-                fs.renameSync(source, dest);
-
-                // TODO: use lock? make sure dest is not overwritten
-                // when diff processes file
-                diff.fileChanged(req.params.source, req.params.file);
-              } else {
+                // TODO: DRY! Refactor!
                 res.status(422);
                 res.send(responseError);
-                fs.unlinkSync(source);
-              }
-            });
+                //fs.unlinkSync(source);
 
-        } else {
-          // TODO: check file size!
+              })
+              .on('end', function() {
 
-          var json,
-              responseError,
-              valid = false;
+                if (allValid) {
+                  res.sendStatus(200);
+                  fs.renameSync(source, dest);
 
-          try {
-            json = JSON.parse(fs.readFileSync(source, 'utf8'));
-            valid = validators[req.params.file](json);
-          } catch (e) {
-            responseError = {
-              error: "Error parsing JSON",
-              details: e
-            };
-          }
-
-          if (valid) {
-            res.sendStatus(200);
-            fs.renameSync(source, dest);
-
-            diff.fileChanged(req.params.source, req.params.file);
+                  // TODO: use lock? make sure dest is not overwritten
+                  // when diff processes file
+                  diff.fileChanged(req.params.source, req.params.file);
+                } else {
+                  res.status(422);
+                  res.send(responseError);
+                  fs.unlinkSync(source);
+                }
+              });
           } else {
-            res.status(405);
-            if (validators[req.params.file].errors) {
+            // TODO: check file size!
+
+            var json,
+                responseError,
+                valid = false;
+
+            try {
+              json = JSON.parse(fs.readFileSync(source, 'utf8'));
+              valid = validators[req.params.file](json);
+            } catch (e) {
               responseError = {
-                error: "File does not comply to JSON schema",
-                details: validators[req.params.file].errors
+                error: "Error parsing JSON",
+                details: e
               };
             }
 
-            res.send(responseError);
-            fs.unlinkSync(source);
+            if (valid) {
+              res.sendStatus(200);
+              fs.renameSync(source, dest);
+
+              diff.fileChanged(req.params.source, req.params.file);
+            } else {
+              res.status(405);
+              if (validators[req.params.file].errors) {
+                responseError = {
+                  error: "File does not comply to JSON schema",
+                  details: validators[req.params.file].errors
+                };
+              }
+
+              res.send(responseError);
+              fs.unlinkSync(source);
+            }
           }
+        } else {
+          res.status(422);
+          res.send({
+            error: "No data received"
+          });
         }
+
       } else {
         res.status(405);
         res.send({
