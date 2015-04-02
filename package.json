@@ -24,7 +24,7 @@
     "test": "jshint index.js clear-sources.js lib test && jscs clear-sources.js index.js lib test && tape test/*.test.js"
   },
   "author": "Bert Spaan",
-  "license": "MIT",
+  "license": "GPLv3",
   "jshintConfig": {
     "node": true,
     "globalstrict": false,
