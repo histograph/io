@@ -1,5 +1,7 @@
 var fs = require('fs');
-var sourcesDir = './sources';
+var path = require('path');
+var config = require(process.env.HISTOGRAPH_CONFIG);
+var sourcesDir = path.join(config.api.dataDir, 'sources');
 var files = [
       'pits',
       'relations'
