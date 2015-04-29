@@ -1,18 +1,13 @@
 # Histograph IO
 
-With Histograph IO, you can import [Newline delimited JSON](http://ndjson.org/) files into [Histograph](http://histograph.github.io).
+Express routing middleware for [Histograph API](https://github.com/histograph/api).
 
-## Redis
+With Histograph IO, you can:
 
-Histograph IO needs Redis!
+- import [Newline delimited JSON](http://ndjson.org/) files into [Histograph](http://histograph.github.io),
+- add/update/view sources & metadata.
 
-Install Redis:
-
-    brew install redis
-
-Start Redis:
-
-    redis-server /usr/local/etc/redis.conf
+Clone/download Histograph IO repository, run `npm install`, and start [Histograph API](https://github.com/histograph/api).
 
 ## License
 
