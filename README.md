@@ -4,7 +4,7 @@ Express routing middleware for [Histograph API](https://github.com/histograph/ap
 
 With Histograph IO, you can:
 
-- import [Newline delimited JSON](http://ndjson.org/) files into [Histograph](http://histograph.github.io),
+- import [Newline delimited JSON](http://ndjson.org/) files into [Histograph](http://histograph.io),
 - add/update/view sources & metadata.
 
 Clone/download Histograph IO repository, run `npm install`, and start [Histograph API](https://github.com/histograph/api).
