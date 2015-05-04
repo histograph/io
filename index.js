@@ -7,7 +7,6 @@ var JSONStream = require('JSONStream');
 var ndjson = require('ndjson');
 var cors = require('cors');
 var request = require('request');
-var async = require('async');
 var crypto = require('crypto');
 var geojsonhint = require('geojsonhint');
 var basicAuth = require('basic-auth');
@@ -25,7 +24,7 @@ app.use(bodyParser.json({
 }));
 
 app.use(bodyParser.text({
-   type: 'application/x-ndjson'
+  type: 'application/x-ndjson'
 }));
 
 app.use(cors());
@@ -82,6 +81,7 @@ app.post('/sources',
       });
     }
   }
+
 );
 
 app.patch('/sources/:source',
@@ -90,7 +90,7 @@ app.patch('/sources/:source',
   function(req, res) {
     var source = req.body;
 
-    if (source.id == req.params.source || source.id == undefined) {
+    if (source.id == req.params.source || source.id === undefined) {
       if (validators.source(source)) {
         db.updateSource(res, source, function() {
           send200(res);
@@ -106,6 +106,7 @@ app.patch('/sources/:source',
       });
     }
   }
+
 );
 
 app.delete('/sources/:source',
@@ -125,6 +126,7 @@ app.delete('/sources/:source',
       });
     });
   }
+
 );
 
 app.get('/sources/:source', function(req, res) {
@@ -146,6 +148,7 @@ app.get('/sources/:source/rejected_relations',
       .pipe(JSONStream.stringify())
       .pipe(res);
   }
+
 );
 
 app.get('/sources/:source/:file(pits|relations)',
@@ -166,6 +169,7 @@ app.get('/sources/:source/:file(pits|relations)',
       }
     });
   }
+
 );
 
 app.put('/sources/:source/:file(pits|relations)',
@@ -206,7 +210,7 @@ app.put('/sources/:source/:file(pits|relations)',
     }
 
     if (uploadedFilename) {
-      var newFilename = path.join(config.api.dataDir, 'sources', req.params.source, req.params.file + '.ndjson')
+      var newFilename = path.join(config.api.dataDir, 'sources', req.params.source, req.params.file + '.ndjson');
 
       var responseError = {
         error: 'NDJSON does not comply to schema',
@@ -284,6 +288,7 @@ app.put('/sources/:source/:file(pits|relations)',
       });
     }
   }
+
 );
 
 fs.mkdirsSync(path.join(config.api.dataDir, 'sources'));
