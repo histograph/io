@@ -9,6 +9,7 @@ var cors = require('cors');
 var request = require('request');
 var async = require('async');
 var crypto = require('crypto');
+var geojsonhint = require('geojsonhint');
 var basicAuth = require('basic-auth');
 var app = express();
 var diff = require('./lib/diff');
@@ -31,6 +32,12 @@ app.use(cors());
 
 function send200(res) {
   res.status(200).send({
+    message: 'ok'
+  });
+}
+
+function send201(res) {
+  res.status(201).send({
     message: 'ok'
   });
 }
@@ -65,7 +72,7 @@ app.post('/sources',
           var owner = basicAuth(req);
           db.createSource(res, source, owner.name, function() {
             current.createDir(source.id);
-            send200(res);
+            send201(res);
           });
         }
       });
@@ -213,12 +220,26 @@ app.put('/sources/:source/:file(pits|relations)',
       fs.createReadStream(uploadedFilename)
         .pipe(ndjson.parse())
         .on('data', function(obj) {
-          var valid = validators[req.params.file](obj);
-          if (!valid) {
+          var errors;
+          var jsonValid = validators[req.params.file](obj);
+          var thisValid = true;
+
+          if (!jsonValid) {
+            errors = validators[req.params.file].errors;
+            thisValid = false;
+          } else if (req.params.file === 'pits' && obj.geometry) {
+            var geojsonErrors = geojsonhint.hint(obj.geometry);
+            if (geojsonErrors.length > 0) {
+              errors = geojsonErrors;
+              thisValid = false;
+            }
+          }
+
+          if (!thisValid) {
             if (responseError.details.length < 10) {
               responseError.details.push({
                 line: lineNr,
-                errors: validators[req.params.file].errors
+                errors: errors
               });
             }
 
