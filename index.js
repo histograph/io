@@ -142,7 +142,7 @@ app.get('/sources/:source', function(req, res) {
 app.get('/sources/:source/rejected_relations',
   db.sourceExists,
   function(req, res) {
-    var uri = coreApiUrl + 'rejected?source=' + req.params.source;
+    var uri = coreApiUrl + 'rejected?sourceid=' + req.params.source;
     request.get(uri)
       .pipe(JSONStream.parse('rejected_relations.*'))
       .pipe(JSONStream.stringify())
