@@ -210,7 +210,11 @@ app.put('/sources/:source/:file(pits|relations)',
     }
 
     if (uploadedFilename) {
-      var newFilename = path.join(config.api.dataDir, 'sources', req.params.source, req.params.file + '.ndjson');
+      var newDirname = path.join(config.api.dataDir, 'sources', req.params.source);
+      var newFilename = path.join(newDirname, req.params.file + '.ndjson');
+
+      // create subdir
+      fs.mkdirsSync(newDirname);
 
       var responseError = {
         error: 'NDJSON does not comply to schema',
