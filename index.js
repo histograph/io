@@ -253,6 +253,7 @@ app.put('/sources/:source/:file(pits|relations)',
           lineNr += 1;
         })
         .on('error', function(err) {
+
           allValid = false;
           if (responseError.details.length < 10) {
             responseError.details.push({
@@ -261,9 +262,12 @@ app.put('/sources/:source/:file(pits|relations)',
             });
           }
 
+          if (!finished) {
+            res.status(422).send(responseError);
+            fs.unlinkSync(uploadedFilename);
+          }
+
           finished = true;
-          res.status(422).send(responseError);
-          fs.unlinkSync(uploadedFilename);
 
           lineNr += 1;
         })
