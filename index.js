@@ -217,7 +217,7 @@ app.put('/sources/:source/:file(pits|relations)',
       fs.mkdirsSync(newDirname);
 
       var responseError = {
-        error: 'NDJSON does not comply to schema',
+        message: 'NDJSON does not comply to schema',
         details: []
       };
 
@@ -292,7 +292,7 @@ app.put('/sources/:source/:file(pits|relations)',
 
     } else {
       res.status(422).send({
-        error: 'No data received'
+        message: 'No data received'
       });
     }
   }
