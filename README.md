@@ -15,13 +15,13 @@ IO adds PIT and relation changes onto Histograph's Redis queue.
 
 IO uses the adds messages of the following form, as stringified JSON objects:
 
-```json
+```js
     {
       "sourceid": "sourceid",
       "type": "pit|relation",
       "action": "add|delete|update",
       "data": {
-        ...
+        // PIT/relation data
       }
     }
 ```
