@@ -17,7 +17,6 @@ var db = require('./lib/db');
 var current = require('./lib/current');
 var validators = require('./lib/validators');
 var config = require(process.env.HISTOGRAPH_CONFIG);
-var coreApiUrl = 'http://' + config.core.traversal.host + ':' + config.core.traversal.port + '/';
 
 app.use(bodyParser.json({
   type: 'application/json'
@@ -138,18 +137,6 @@ app.get('/sources/:source', function(req, res) {
     }
   });
 });
-
-app.get('/sources/:source/rejected_relations',
-  db.sourceExists,
-  function(req, res) {
-    var uri = coreApiUrl + 'rejected?sourceid=' + req.params.source;
-    request.get(uri)
-      .pipe(JSONStream.parse('rejected_relations.*'))
-      .pipe(JSONStream.stringify())
-      .pipe(res);
-  }
-
-);
 
 app.get('/sources/:source/:file(pits|relations)',
   db.sourceExists,
