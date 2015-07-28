@@ -1,7 +1,0 @@
-[
-  {
-    "name": "Test to verdwenen dorpen",
-    "script": "maak link ALS <naam> lijkt heel erg op verdwenendorpen.naam",
-    "threshold": 0.8
-  }
-]
