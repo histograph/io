@@ -15,7 +15,7 @@ IO uses the adds messages of the following form, as stringified JSON objects:
 
 ```js
 {
-  "sourceid": "sourceid",
+  "dataset": "dataset1",
   "type": "pit|relation",
   "action": "add|delete|update",
   "data": {
