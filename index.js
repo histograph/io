@@ -1,7 +1,6 @@
 var fs = require('fs-extra');
 var path = require('path');
 var express = require('express');
-var router = express.Router();
 var Busboy = require('busboy');
 var bodyParser = require('body-parser');
 var cors = require('cors');
@@ -19,15 +18,15 @@ var config = require(process.env.HISTOGRAPH_CONFIG);
 
 var maxRealTimeCheckFileSize = 500000000;
 
-router.use(bodyParser.json({
+app.use(bodyParser.json({
   type: 'application/json'
 }));
 
-router.use(bodyParser.text({
+app.use(bodyParser.text({
   type: 'application/x-ndjson'
 }));
 
-router.use(cors());
+app.use(cors());
 
 function send200(res) {
   res.status(200).send({
@@ -53,13 +52,13 @@ function send409(res, type, id) {
   });
 }
 
-router.get('/datasets', function(req, res) {
+app.get('/datasets', function(req, res) {
   db.getDatasets(res, function(data) {
     res.send(data);
   });
 });
 
-router.post('/datasets',
+app.post('/datasets',
   auth.owner,
   function(req, res) {
     var dataset = req.body;
@@ -84,7 +83,7 @@ router.post('/datasets',
 
 );
 
-router.patch('/datasets/:dataset',
+app.patch('/datasets/:dataset',
   db.datasetExists,
   auth.ownerForDataset,
   function(req, res) {
@@ -109,7 +108,7 @@ router.patch('/datasets/:dataset',
 
 );
 
-router.delete('/datasets/:dataset',
+app.delete('/datasets/:dataset',
   db.datasetExists,
   auth.ownerForDataset,
   function(req, res) {
@@ -129,7 +128,7 @@ router.delete('/datasets/:dataset',
 
 );
 
-router.get('/datasets/:dataset', function(req, res) {
+app.get('/datasets/:dataset', function(req, res) {
   db.getDataset(res, req.params.dataset, function(data) {
     if (data) {
       res.send(data);
@@ -139,7 +138,7 @@ router.get('/datasets/:dataset', function(req, res) {
   });
 });
 
-router.get('/datasets/:dataset/:file(pits|relations)',
+app.get('/datasets/:dataset/:file(pits|relations)',
   db.datasetExists,
   function(req, res) {
     var filename = current.getCurrentFilename(req.params.dataset, req.params.file);
@@ -160,7 +159,7 @@ router.get('/datasets/:dataset/:file(pits|relations)',
 
 );
 
-router.put('/datasets/:dataset/:file(pits|relations)',
+app.put('/datasets/:dataset/:file(pits|relations)',
   db.datasetExists,
   auth.ownerForDataset,
   function(req, res) {
@@ -237,4 +236,4 @@ router.put('/datasets/:dataset/:file(pits|relations)',
 fs.mkdirsSync(path.join(config.api.dataDir, 'datasets'));
 fs.mkdirsSync(path.join(config.api.dataDir, 'uploads'));
 
-module.exports = router;
+module.exports = app;
