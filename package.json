@@ -29,7 +29,7 @@
     "tape": "^3.4.0"
   },
   "scripts": {
-    "test": "jshint index.js clear-sources.js lib test && jscs clear-sources.js index.js lib test && tape test/*.test.js"
+    "test": "jshint index.js lib && jscs index.js lib"
   },
   "author": "Bert Spaan",
   "license": "GPL-3.0",
