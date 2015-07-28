@@ -1,6 +1,6 @@
 {
   "name": "histograph-io",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "description": "Histograph IO API",
   "main": "index.js",
   "dependencies": {
@@ -8,6 +8,7 @@
     "basic-auth": "^1.0.0",
     "bcrypt": "^0.8.3",
     "body-parser": "^1.12.2",
+    "busboy": "^0.2.9",
     "cors": "^2.6.0",
     "diff-utility": "^0.0.6",
     "express": "^4.11.2",
@@ -31,7 +32,7 @@
     "test": "jshint index.js clear-sources.js lib test && jscs clear-sources.js index.js lib test && tape test/*.test.js"
   },
   "author": "Bert Spaan",
-  "license": "GPLv3",
+  "license": "GPL-3.0",
   "jshintConfig": {
     "node": true,
     "globalstrict": false,
