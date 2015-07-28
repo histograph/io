@@ -4,7 +4,6 @@ var express = require('express');
 var Busboy = require('busboy');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var request = require('request');
 var crypto = require('crypto');
 var basicAuth = require('basic-auth');
 var app = express();
@@ -176,16 +175,17 @@ app.put('/datasets/:dataset/:file(pits|relations)',
       busboy = new Busboy({
         headers: req.headers
       });
-    } catch(e) {
+    } catch (e) {
       // No multi-part data to parse!
     }
 
     if (busboy) {
       // multipart/form-data file upload, use Busboy!
 
-      busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+      busboy.on('file', function(fieldname, file) {
         file.pipe(fs.createWriteStream(uploadedFilename));
       });
+
       busboy.on('finish', function() {
 
         fs.stat(uploadedFilename, function(err, stat) {
@@ -203,6 +203,7 @@ app.put('/datasets/:dataset/:file(pits|relations)',
           }
         });
       });
+
       return req.pipe(busboy);
 
     } else {
@@ -227,9 +228,10 @@ app.put('/datasets/:dataset/:file(pits|relations)',
       });
     }
   }
+
 )
 .on('error', function(e) {
-    // Call callback function with the error object which comes from the request
+  // Call callback function with the error object which comes from the request
   console.error(e);
 });
 
