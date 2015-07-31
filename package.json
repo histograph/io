@@ -21,7 +21,8 @@
     "passport": "^0.2.1",
     "passport-http": "^0.2.2",
     "redis": "^0.12.1",
-    "request": "^2.55.0"
+    "request": "^2.55.0",
+    "histograph-config": "histograph/config"
   },
   "devDependencies": {
     "jscs": "^1.10.0",

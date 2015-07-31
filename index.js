@@ -13,7 +13,7 @@ var db = require('./lib/db');
 var current = require('./lib/current');
 var validators = require('./lib/validators');
 var uploadedFile = require('./lib/uploaded-file');
-var config = require(process.env.HISTOGRAPH_CONFIG);
+var config = require('histograph-config');
 
 var maxRealTimeCheckFileSize = 500000000;
 
