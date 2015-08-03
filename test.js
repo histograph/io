@@ -5,7 +5,7 @@ var io = require('./index');
 
 app.use('/', io);
 
-app.listen(config.api.port, function() {
+app.listen(config.api.bindPort, function() {
   console.log(config.logo.join('\n'));
-  console.log('Histograph IO listening at port ' + config.api.port);
+  console.log('Histograph IO listening at port ' + config.api.bindPort);
 });
