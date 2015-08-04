@@ -117,8 +117,8 @@ app.delete('/datasets/:dataset',
       fs.closeSync(fs.openSync(current.getFilename(req.params.dataset, 'pits'), 'w'));
       fs.closeSync(fs.openSync(current.getFilename(req.params.dataset, 'relations'), 'w'));
 
-      diff.fileChanged(req.params.dataset, 'pits', function() {
-        diff.fileChanged(req.params.dataset, 'relations', function() {
+      diff.fileChanged(req.params.dataset, 'pits', false, function() {
+        diff.fileChanged(req.params.dataset, 'relations', false, function() {
           fs.removeSync(path.join(config.api.dataDir, 'datasets', req.params.dataset));
         });
       });
