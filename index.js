@@ -162,6 +162,11 @@ app.put('/datasets/:dataset/:file(pits|relations)',
   db.datasetExists,
   auth.ownerForDataset,
   function(req, res) {
+
+    // when force header is specified, NDJSON files are _not_ diffed,
+    // but directly pushed to Redis
+    var force = req.headers['x-histograph-force'] === 'true';
+
     // TODO this path should fail when content-type is different
     req.accepts('application/x-ndjson');
 
@@ -196,10 +201,10 @@ app.put('/datasets/:dataset/:file(pits|relations)',
           }
 
           if (stat.size <= maxRealTimeCheckFileSize) {
-            uploadedFile.process(res, req.params.dataset, req.params.file, uploadedFilename);
+            uploadedFile.process(res, req.params.dataset, req.params.file, uploadedFilename, force);
           } else {
             send200(res);
-            uploadedFile.process(null, req.params.dataset, req.params.file, uploadedFilename);
+            uploadedFile.process(null, req.params.dataset, req.params.file, uploadedFilename, force);
           }
         });
       });
@@ -223,7 +228,7 @@ app.put('/datasets/:dataset/:file(pits|relations)',
             message: err.error
           });
         } else {
-          uploadedFile.process(res, req.params.dataset, req.params.file, uploadedFilename);
+          uploadedFile.process(res, req.params.dataset, req.params.file, uploadedFilename, force);
         }
       });
     }
