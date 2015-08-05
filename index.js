@@ -1,14 +1,10 @@
 var fs = require('fs-extra');
 var path = require('path');
 var express = require('express');
-var multer = require('multer');
+var Busboy = require('busboy');
 var bodyParser = require('body-parser');
-var JSONStream = require('jsonstream');
-var ndjson = require('ndjson');
 var cors = require('cors');
-var request = require('request');
 var crypto = require('crypto');
-var geojsonhint = require('geojsonhint');
 var basicAuth = require('basic-auth');
 var app = express();
 var diff = require('./lib/diff');
@@ -16,8 +12,10 @@ var auth = require('./lib/auth');
 var db = require('./lib/db');
 var current = require('./lib/current');
 var validators = require('./lib/validators');
-var config = require(process.env.HISTOGRAPH_CONFIG);
-var coreApiUrl = 'http://' + config.core.traversal.host + ':' + config.core.traversal.port + '/';
+var uploadedFile = require('./lib/uploaded-file');
+var config = require('histograph-config');
+
+var maxRealTimeCheckFileSize = 500000000;
 
 app.use(bodyParser.json({
   type: 'application/json'
@@ -53,75 +51,75 @@ function send409(res, type, id) {
   });
 }
 
-app.get('/sources', function(req, res) {
-  db.getSources(res, function(data) {
+app.get('/datasets', function(req, res) {
+  db.getDatasets(res, function(data) {
     res.send(data);
   });
 });
 
-app.post('/sources',
+app.post('/datasets',
   auth.owner,
   function(req, res) {
-    var source = req.body;
-    if (validators.source(source)) {
-      db.getSource(res, source.id, function(data) {
+    var dataset = req.body;
+    if (validators.dataset(dataset)) {
+      db.getDataset(res, dataset.id, function(data) {
         if (data) {
-          send409(res, 'Source', source.id);
+          send409(res, 'Dataset', dataset.id);
         } else {
           var owner = basicAuth(req);
-          db.createSource(res, source, owner.name, function() {
-            current.createDir(source.id);
+          db.createDataset(res, dataset, owner.name, function() {
+            current.createDir(dataset.id);
             send201(res);
           });
         }
       });
     } else {
       res.status(422).send({
-        message: validators.source.errors
+        message: validators.dataset.errors
       });
     }
   }
 
 );
 
-app.patch('/sources/:source',
-  db.sourceExists,
-  auth.ownerForSource,
+app.patch('/datasets/:dataset',
+  db.datasetExists,
+  auth.ownerForDataset,
   function(req, res) {
-    var source = req.body;
+    var dataset = req.body;
 
-    if (source.id == req.params.source || source.id === undefined) {
-      if (validators.source(source)) {
-        db.updateSource(res, source, function() {
+    if (dataset.id == req.params.dataset || dataset.id === undefined) {
+      if (validators.dataset(dataset)) {
+        db.updateDataset(res, dataset, function() {
           send200(res);
         });
       } else {
         res.status(422).send({
-          message: validators.source.errors
+          message: validators.dataset.errors
         });
       }
     } else {
       res.status(422).send({
-        message: 'Source ID in URL must match source ID in JSON body'
+        message: 'Dataset ID in URL must match dataset ID in JSON body'
       });
     }
   }
 
 );
 
-app.delete('/sources/:source',
-  db.sourceExists,
-  auth.ownerForSource,
+app.delete('/datasets/:dataset',
+  db.datasetExists,
+  auth.ownerForDataset,
   function(req, res) {
-    db.deleteSource(res, req.params.source, function() {
+    db.deleteDataset(res, req.params.dataset, function() {
       send200(res);
 
-      fs.closeSync(fs.openSync(current.getFilename(req.params.source, 'pits'), 'w'));
-      fs.closeSync(fs.openSync(current.getFilename(req.params.source, 'relations'), 'w'));
+      fs.closeSync(fs.openSync(current.getFilename(req.params.dataset, 'pits'), 'w'));
+      fs.closeSync(fs.openSync(current.getFilename(req.params.dataset, 'relations'), 'w'));
 
-      diff.fileChanged(req.params.source, 'pits', function() {
-        diff.fileChanged(req.params.source, 'relations', function() {
-          fs.removeSync(path.join(config.api.dataDir, 'sources', req.params.source));
+      diff.fileChanged(req.params.dataset, 'pits', false, function() {
+        diff.fileChanged(req.params.dataset, 'relations', false, function() {
+          fs.removeSync(path.join(config.api.dataDir, 'datasets', req.params.dataset));
         });
       });
     });
@@ -129,32 +127,20 @@ app.delete('/sources/:source',
 
 );
 
-app.get('/sources/:source', function(req, res) {
-  db.getSource(res, req.params.source, function(data) {
+app.get('/datasets/:dataset', function(req, res) {
+  db.getDataset(res, req.params.dataset, function(data) {
     if (data) {
       res.send(data);
     } else {
-      send404(res, 'Source', req.params.source);
+      send404(res, 'Dataset', req.params.dataset);
     }
   });
 });
 
-app.get('/sources/:source/rejected_relations',
-  db.sourceExists,
+app.get('/datasets/:dataset/:file(pits|relations)',
+  db.datasetExists,
   function(req, res) {
-    var uri = coreApiUrl + 'rejected?sourceid=' + req.params.source;
-    request.get(uri)
-      .pipe(JSONStream.parse('rejected_relations.*'))
-      .pipe(JSONStream.stringify())
-      .pipe(res);
-  }
-
-);
-
-app.get('/sources/:source/:file(pits|relations)',
-  db.sourceExists,
-  function(req, res) {
-    var filename = current.getCurrentFilename(req.params.source, req.params.file);
+    var filename = current.getCurrentFilename(req.params.dataset, req.params.file);
     fs.exists(filename, function(exists) {
       if (exists) {
         var stat = fs.statSync(filename);
@@ -172,30 +158,61 @@ app.get('/sources/:source/:file(pits|relations)',
 
 );
 
-app.put('/sources/:source/:file(pits|relations)',
-  db.sourceExists,
-  auth.ownerForSource,
-  multer({
-    dest: path.join(config.api.dataDir, 'uploads')
-  }),
+app.put('/datasets/:dataset/:file(pits|relations)',
+  db.datasetExists,
+  auth.ownerForDataset,
   function(req, res) {
+
+    // when force header is specified, NDJSON files are _not_ diffed,
+    // but directly pushed to Redis
+    var force = req.headers['x-histograph-force'] === 'true';
+
     // TODO this path should fail when content-type is different
     req.accepts('application/x-ndjson');
 
-    var uploadedFilename;
+    var currentDate = (new Date()).valueOf().toString();
+    var random = Math.random().toString();
 
-    if (req.files && Object.keys(req.files).length > 0) {
-      // File upload, multipart/form-data in req.files
+    var uploadedFilename = path.join(config.api.dataDir, 'uploads', crypto.createHash('sha1').update(currentDate + random).digest('hex') + '.ndjson');
 
-      // TODO: make sure to only accept one file at a time
-      uploadedFilename = path.join(config.api.dataDir, 'uploads', req.files.file.name);
+    var busboy;
+    try {
+      busboy = new Busboy({
+        headers: req.headers
+      });
+    } catch (e) {
+      // No multi-part data to parse!
+    }
+
+    if (busboy) {
+      // multipart/form-data file upload, use Busboy!
+
+      busboy.on('file', function(fieldname, file) {
+        file.pipe(fs.createWriteStream(uploadedFilename));
+      });
+
+      busboy.on('finish', function() {
+
+        fs.stat(uploadedFilename, function(err, stat) {
+          if (err) {
+            res.status(409).send({
+              message: err.error
+            });
+          }
+
+          if (stat.size <= maxRealTimeCheckFileSize) {
+            uploadedFile.process(res, req.params.dataset, req.params.file, uploadedFilename, force);
+          } else {
+            send200(res);
+            uploadedFile.process(null, req.params.dataset, req.params.file, uploadedFilename, force);
+          }
+        });
+      });
+
+      return req.pipe(busboy);
+
     } else {
       // JSON POST data in req.body
-
-      var currentDate = (new Date()).valueOf().toString();
-      var random = Math.random().toString();
-
-      uploadedFilename = path.join(config.api.dataDir, 'uploads', crypto.createHash('sha1').update(currentDate + random).digest('hex') + '.ndjson');
       var contents;
 
       // Apparently, req.body == {} when JSON POST data is empty
@@ -205,105 +222,25 @@ app.put('/sources/:source/:file(pits|relations)',
         contents = req.body;
       }
 
-      var file = fs.openSync(uploadedFilename, 'w');
-      fs.writeSync(file, contents);
-    }
-
-    if (uploadedFilename) {
-      var newDirname = path.join(config.api.dataDir, 'sources', req.params.source);
-      var newFilename = path.join(newDirname, req.params.file + '.ndjson');
-
-      // create subdir
-      fs.mkdirsSync(newDirname);
-
-      var responseError = {
-        message: 'NDJSON does not comply to schema',
-        details: []
-      };
-
-      var finished = false;
-      var allValid = true;
-      var lineNr = 1;
-
-      fs.createReadStream(uploadedFilename)
-        .pipe(ndjson.parse())
-        .on('data', function(obj) {
-          var errors;
-          var jsonValid = validators[req.params.file](obj);
-          var thisValid = true;
-
-          if (!jsonValid) {
-            errors = validators[req.params.file].errors;
-            thisValid = false;
-          } else if (req.params.file === 'pits' && obj.geometry) {
-            var geojsonErrors = geojsonhint.hint(obj.geometry);
-            if (geojsonErrors.length > 0) {
-              errors = geojsonErrors;
-              thisValid = false;
-            }
-          }
-
-          if (!thisValid) {
-            if (responseError.details.length < 10) {
-              responseError.details.push({
-                line: lineNr,
-                errors: errors
-              });
-            }
-
-            allValid = false;
-          }
-
-          lineNr += 1;
-        })
-        .on('error', function(err) {
-
-          allValid = false;
-          if (responseError.details.length < 10) {
-            responseError.details.push({
-              line: lineNr,
-              errors: err.message
-            });
-          }
-
-          if (!finished) {
-            res.status(422).send(responseError);
-            fs.unlinkSync(uploadedFilename);
-          }
-
-          finished = true;
-
-          lineNr += 1;
-        })
-        .on('end', function() {
-          if (allValid) {
-            send200(res);
-
-            fs.renameSync(uploadedFilename, newFilename);
-
-            // TODO: use lock? make sure dest is not overwritten
-            // when diff processes file
-            diff.fileChanged(req.params.source, req.params.file);
-          } else if (!finished) {
-            res.status(422).send(responseError);
-            fs.unlinkSync(uploadedFilename);
-          }
-        });
-
-    } else {
-      res.status(422).send({
-        message: 'No data received'
+      fs.writeFile(uploadedFilename, contents, function(err) {
+        if (err) {
+          res.status(409).send({
+            message: err.error
+          });
+        } else {
+          uploadedFile.process(res, req.params.dataset, req.params.file, uploadedFilename, force);
+        }
       });
     }
   }
 
-);
+)
+.on('error', function(e) {
+  // Call callback function with the error object which comes from the request
+  console.error(e);
+});
 
-fs.mkdirsSync(path.join(config.api.dataDir, 'sources'));
+fs.mkdirsSync(path.join(config.api.dataDir, 'datasets'));
 fs.mkdirsSync(path.join(config.api.dataDir, 'uploads'));
-
-// app.listen(config.io.port, function() {
-//   console.log('Histograph IO listening on port ' + config.io.port);
-// });
 
 module.exports = app;
