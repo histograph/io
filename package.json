@@ -16,7 +16,7 @@
     "geojsonhint": "^1.0.0",
     "hiredis": "^0.2.0",
     "histograph-config": "histograph/config",
-    "histograph-schemas": "histograph/schemas#graphmalizer",
+    "histograph-schemas": "histograph/schemas",
     "is-my-json-valid": "^2.12.0",
     "ndjson": "^1.4.1",
     "neo4j": "^2.0.0-RC1",
