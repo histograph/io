@@ -194,7 +194,7 @@ app.put('/datasets/:dataset/:file(pits|relations)',
       busboy.on('finish', function() {
 
         fs.stat(uploadedFilename, function(err, stat) {
-          if (err) {
+          if (err && stat) {
             res.status(409).send({
               message: err.error
             });
