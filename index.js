@@ -194,9 +194,17 @@ app.put('/datasets/:dataset/:file(pits|relations)',
       busboy.on('finish', function() {
 
         fs.stat(uploadedFilename, function(err, stat) {
-          if (err && stat) {
+          if (err || !stat) {
+
+            var message;
+            if (err && err.error) {
+              message = err.error;
+            } else {
+              message = 'Error reading uploaded file'
+            }
+
             res.status(409).send({
-              message: err.error
+              message: message
             });
           }
 
