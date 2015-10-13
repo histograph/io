@@ -200,7 +200,7 @@ app.put('/datasets/:dataset/:file(pits|relations)',
             if (err && err.error) {
               message = err.error;
             } else {
-              message = 'Error reading uploaded file'
+              message = 'Error reading uploaded file';
             }
 
             res.status(409).send({
