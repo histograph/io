@@ -14,6 +14,7 @@
     "express": "^4.11.2",
     "fs-extra": "^0.16.3",
     "geojsonhint": "^1.0.0",
+    "highland": "^2.5.1",
     "hiredis": "^0.2.0",
     "histograph-config": "histograph/config",
     "histograph-schemas": "histograph/schemas",
