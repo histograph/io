@@ -206,6 +206,8 @@ app.put('/datasets/:dataset/:file(pits|relations)',
             res.status(409).send({
               message: message
             });
+
+            return;
           }
 
           if (stat.size <= maxRealTimeCheckFileSize) {
