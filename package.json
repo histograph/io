@@ -10,7 +10,7 @@
     "body-parser": "^1.14.1",
     "busboy": "^0.2.11",
     "cors": "^2.7.1",
-    "diff-utility": "^0.1.0",
+    "diff-utility": "histograph/node-diff-utility",
     "elasticsearch": "^8.2.0",
     "express": "^4.13.3",
     "fs-extra": "^0.16.5",
