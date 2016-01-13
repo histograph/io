@@ -3,6 +3,10 @@
   "version": "0.5.0",
   "description": "Histograph IO API",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/histograph/io.git"
+  },
   "dependencies": {
     "async": "^0.9.2",
     "basic-auth": "^1.0.3",
