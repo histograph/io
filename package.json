@@ -1,6 +1,6 @@
 {
   "name": "histograph-io",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Histograph IO API",
   "main": "index.js",
   "repository": {
@@ -20,8 +20,8 @@
     "geojsonhint": "^1.1.0",
     "highland": "^2.5.1",
     "diff-utility": "git+https://github.com/histograph/node-diff-utility#v0.5.0",
-    "histograph-config": "git+https://github.com/histograph/config#v0.5.0",
-    "histograph-schemas": "git+https://github.com/histograph/schemas#v0.5.0",
+    "histograph-config": "git+https://github.com/histograph/config#v0.5.1",
+    "histograph-schemas": "git+https://github.com/histograph/schemas#v0.5.1",
     "is-my-json-valid": "^2.12.2",
     "ndjson": "^1.4.2",
     "neo4j": "^2.0.0-alpha5",
