@@ -21,20 +21,24 @@
           "type": "geo_shape"
         },
         "uri": {
-          "type": "keyword"
+          "type": "keyword",
+          "index": true
         },
         "id": {
           "store": true,
-          "type": "keyword"
+          "type": "keyword",
+          "index": true
         },
         "type": {
-          "type": "keyword"
+          "type": "keyword",
+          "index": true
         },
         "name": {
           "fields": {
             "analyzed": {
               "store": true,
-              "type": "text"
+              "type": "text",
+              "index": true
             },
             "exact": {
               "analyzer": "lowercase",
@@ -45,7 +49,8 @@
           "type": "string"
         },
         "dataset": {
-          "type": "keyword"
+          "type": "keyword",
+          "index": true
         },
         "validSince": {
           "format": "date_optional_time",
