@@ -43,10 +43,10 @@
             "exact": {
               "analyzer": "lowercase",
               "store": true,
-              "type": "string"
+              "type": "text"
             }
           },
-          "type": "string"
+          "type": "text"
         },
         "dataset": {
           "type": "keyword",
