@@ -1,21 +1,21 @@
-var fs = require('fs-extra');
-var path = require('path');
-var express = require('express');
-var Busboy = require('busboy');
-var bodyParser = require('body-parser');
-var cors = require('cors');
-var crypto = require('crypto');
-var basicAuth = require('basic-auth');
-var app = express();
-var diff = require('./lib/diff');
-var auth = require('./lib/auth');
-var db = require('./lib/db');
-var current = require('./lib/current');
-var validators = require('./lib/validators');
-var uploadedFile = require('./lib/uploaded-file');
-var config = require('histograph-config');
+const fs = require('fs-extra');
+const path = require('path');
+const express = require('express');
+const Busboy = require('busboy');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const crypto = require('crypto');
+const basicAuth = require('basic-auth');
+const app = express();
+const diff = require('./lib/diff');
+const auth = require('./lib/auth');
+const db = require('./lib/db');
+const current = require('./lib/current');
+const validators = require('./lib/validators');
+const uploadedFile = require('./lib/uploaded-file');
+const config = require('histograph-config');
 
-var maxRealTimeCheckFileSize = 500000000;
+const maxRealTimeCheckFileSize = 500000000;
 
 app.use(bodyParser.json({
   type: 'application/json'

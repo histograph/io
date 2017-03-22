@@ -22,6 +22,7 @@
     "diff-utility": "git+https://github.com/histograph/node-diff-utility#puppetdeploy",
     "histograph-config": "git+https://github.com/histograph/config#puppetdeploy",
     "histograph-schemas": "git+https://github.com/histograph/schemas#puppetdeploy",
+    "histograph-logging": "git+https://github.com/histograph/logging#puppetdeploy",
     "is-my-json-valid": "^2.15.0",
     "ndjson": "^1.4.2",
     "neo4j": "^2.0.0-RC2",
