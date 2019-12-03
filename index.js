@@ -14,8 +14,11 @@ const current = require('./lib/current');
 const validators = require('./lib/validators');
 const uploadedFile = require('./lib/uploaded-file');
 const config = require('histograph-config');
+const log = require('histograph-logging');
 
 const maxRealTimeCheckFileSize = 500000000;
+
+const my_log = new log("api");
 
 app.use(bodyParser.json({
   type: 'application/json'
@@ -60,6 +63,7 @@ app.get('/datasets', function(req, res) {
 app.post('/datasets',
   auth.owner,
   function(req, res) {
+    my_log.debug("Auth successful");
     var dataset = req.body;
     if (validators.dataset(dataset)) {
       db.getDataset(res, dataset.id, function(data) {
